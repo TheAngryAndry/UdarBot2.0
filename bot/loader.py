@@ -3,7 +3,6 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from dotenv import load_dotenv
 from loguru import logger
-
 import os
 
 load_dotenv() # Load environment variables from .env file

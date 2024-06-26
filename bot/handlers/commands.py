@@ -1,11 +1,13 @@
 from aiogram import types
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import Command, CommandStart
+from aiogram.types import MenuButtonCommands
 from loguru import logger
 from bot.loader import bot, dp, BOT_PASS, router
 from bot.utils.keyboards import create_keyboard
 from bot.utils.models import UserTests, Users
 from bot.utils.states import User_state
+from bot.utils.system import menu_button
 from bot.utils.texts import create_text
 from aiogram import F
 from beanie.operators import In
@@ -29,6 +31,9 @@ from beanie.operators import In
 @router.message(Command('help'))
 @router.message(F.text == 'help')
 async def com_help(message: types.Message) -> None:
+    await bot.set_my_commands(await menu_button())
+    # await bot.set_chat_menu_button(chat_id=message.chat.id, menu_button=types.MenuButtonCommands('commands'))
+
     data = await Users.find_one(Users.user_id == message.from_user.id)
     if not data:
         data = Users(user_id=int(message.from_user.id), user_name=message.from_user.username, first_name=message.from_user.first_name, last_name=message.from_user.last_name, time_offset=0)

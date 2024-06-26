@@ -100,3 +100,4 @@ async def change_glob_time(message: types.Message, state: FSMContext) -> None:
     data.time_offset = int(message.text) - LOCAL_TIME
     await UserTests.save(data)
     await bot.send_message(chat_id=message.chat.id, text=await create_text('time_was_set'))
+
