@@ -1,0 +1,74 @@
+[
+    {
+        "call": "start",
+        "keyboard": [
+            [
+                {
+                    "text": "Учить ударения по одному слову",
+                    "callback_data": "one_emphasis"
+                }
+            ],
+            [
+                {
+                    "text": "Пройти тест",
+                    "callback_data": "do_test"
+                }
+            ],
+            [
+                {
+                    "text": "Посмотреть историю",
+                    "callback_data": "see_progress"
+                }
+            ]
+        ]
+    },
+    {
+        "call": "see_progress",
+        "keyboard": [
+            [
+                {
+                    "text": "Неправильные слова",
+                    "callback_data": "progress_wrong_words"
+                }
+            ],
+            [
+                {
+                    "text": "Правильные слова",
+                    "callback_data": "progress_right_words"
+                }
+            ],
+            [
+                {
+                    "text": "Тесты",
+                    "callback_data": "chose_test"
+                }
+            ],
+            [
+                {
+                    "text": "Все слова и тесты",
+                    "callback_data": "see_all_progress"
+                }
+            ]
+
+        ]
+    },
+    {
+        "call": "test_question",
+        "keyboard": [
+            [
+                {
+                    "text": "5",
+                    "callback_data": "do_test5"
+                },
+                {
+                    "text": "10",
+                    "callback_data": "do_test10"
+                },
+                {
+                    "text": "25",
+                    "callback_data": "do_test25"
+                }
+            ]
+        ]
+    }
+]
