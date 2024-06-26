@@ -1,6 +1,7 @@
 from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from beanie.operators import In
+from bson import ObjectId
 from loguru import logger
 import time
 
@@ -58,7 +59,7 @@ async def see_progress(call: types.CallbackQuery, state: FSMContext):
 async def progress_wrong_words(call: types.CallbackQuery, state: FSMContext) -> None:
     data = await UserWord.find_many(UserWord.user_id == call.message.chat.id, UserWord.success == False).to_list()
     if not data:
-        call.message.answer(text=await create_text('no_progress'))
+        await call.message.answer(text=await create_text('no_progress'))
         return
     st = '(правильное) (неправильное) (время)'
     for i in data:
@@ -73,7 +74,7 @@ async def progress_wrong_words(call: types.CallbackQuery, state: FSMContext) -> 
 async def progress_right_words(call: types.CallbackQuery, state: FSMContext) -> None:
     data = await UserWord.find_many(UserWord.user_id == call.message.chat.id, UserWord.success == True).to_list()
     if not data:
-        call.message.answer(text=await create_text('no_progress'))
+        await call.message.answer(text=await create_text('no_progress'))
         return
     st = '\n\n(слово) (время)'
     for i in data:
@@ -136,11 +137,39 @@ async def chose_test(call: types.CallbackQuery, state: FSMContext) -> None:
                               reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard))
 
 
-@router.callback_query(F.text.startswith('progress_numtest'))
+@router.callback_query(F.data.startswith('progress_numtest'))
 async def progress_test(call: types.CallbackQuery, state: FSMContext) -> None:
-    print(F.text)
-    print('aaaa')
-    # data = await UserTests.find_one(UserTests.id == )
+    data = await UserTests.find_one(UserTests.id == ObjectId(call.data[17:]))
+    if not data:
+        await call.message.answer(text=await create_text('no_progress'))
+        return
+
+    st = ''
+    if any(not i.success for i in data.words):
+        st += '(правильное) (неправильное) (время)'
+        for i in data.words:
+            if not i.success:
+                st += '\n' + str(i.word.right_word) + ' ' + str(i.word.send_word) + ' ' + await calculate_time(i.time,
+                                                                                                               call.message.chat.id)
+
+    if any(i.success for i in data.words):
+        st += '\n\n(слово) (время)'
+        for i in data.words:
+            if i.success:
+                st += '\n' + str(i.word.send_word) + ' ' + str(i.word.send_word) + ' ' + await calculate_time(i.time,
+                                                                                                              call.message.chat.id)
+    count_right, count_wrong = 0, 0
+    for j in data.words:
+        if j.success:
+            count_right += 1
+        else:
+            count_wrong += 1
+    st += '\n\nСтатистика по тесту: процент верных слов' + str(
+        round(count_right * 100 / (count_wrong + count_right))) + '% ' + "Всего слов: " + str(
+        count_right + count_wrong) + 'Время: ' + await calculate_time(data.time_start,
+                                                                      call.message.chat.id) + ", тест решён за " + str(
+        round(data.time_end - data.time_start)) + " секунд"
+    await call.message.answer(text=st)
     await call.answer()
 
 
