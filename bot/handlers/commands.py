@@ -28,7 +28,7 @@ from beanie.operators import In
 @router.message(CommandStart())
 @router.message(Command('help'))
 @router.message(F.text == 'help')
-async def com_help(message: types.Message):
+async def com_help(message: types.Message) -> None:
     data = await Users.find_one(Users.user_id == message.from_user.id)
     if not data:
         data = Users(user_id=int(message.from_user.id), user_name=message.from_user.username, first_name=message.from_user.first_name, last_name=message.from_user.last_name, time_offset=0)
@@ -40,13 +40,14 @@ async def com_help(message: types.Message):
 
 @dp.message(Command('stop'), User_state.answering_emphasis_test)
 @dp.message(Command('stop'), User_state.chose_length_test)
-async def com_stop_test(message: types.Message, state: FSMContext):
+async def com_stop_test(message: types.Message, state: FSMContext) -> None:
     await UserTests.find_many(UserTests.user_id == message.from_user.id and UserTests.stage != -1).delete()
     await state.set_state(User_state.chill)
     await bot.send_message(chat_id=message.chat.id, text=await create_text('stop_test'), reply_markup='start')
 
 
 @dp.message(Command('stop'), User_state.answering_emphasis_words)
-async def com_stop_emphasis(message: types.Message, state: FSMContext):
+async def com_stop_emphasis(message: types.Message, state: FSMContext) -> None:
     await state.set_state(User_state.chill)
     await bot.send_message(chat_id=message.chat.id, text=await create_text('stop'), reply_markup=create_keyboard('start'))
+

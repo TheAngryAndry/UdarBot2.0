@@ -16,6 +16,7 @@ MONGO_USER = os.environ.get('MONGO_USER')
 MONGO_PASS = os.environ.get('MONGO_PASS')
 BOT_PASS = os.environ.get('BOT_PASS')
 TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
+LOCAL_TIME = +3
 
 # Check if token is provided
 if not TOKEN:

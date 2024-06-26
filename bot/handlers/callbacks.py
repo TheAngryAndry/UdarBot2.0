@@ -212,3 +212,23 @@ async def see_all_progress(call: types.CallbackQuery, state: FSMContext) -> None
         st = await create_text('no_progress')
     await call.message.answer(text=st)
     await call.answer()
+
+@router.callback_query(F.data == 'settings')
+async def settings(call: types.CallbackQuery, state: FSMContext) -> None:
+    await call.message.answer(text=await create_text('settings'), reply_markup=create_keyboard('settings'))
+    await call.answer()
+
+
+@router.callback_query(F.data == 'change_glob_time')
+async def change_glob_time(call: types.CallbackQuery, state: FSMContext) -> None:
+    state.set_state(User_state.change_glob_time)
+    await call.message.answer(text=await create_text('change_glob_time'), reply_markup=create_keyboard('change_glob_time'))
+    await call.answer()
+
+@router.callback_query(F.data == "change_glob_time+3")
+async def change_glob_time3(call: types.CallbackQuery, state: FSMContext) -> None:
+    state.set_state(User_state.chill)
+    data = await Users.find_one(Users.user_id == call.message.chat.id)
+    data.time_offset = 0
+    await UserTests.save(data)
+    await call.message.answer(text=await create_text('time_was_set'))

@@ -2,11 +2,11 @@ from aiogram import types, F
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 
-from bot.loader import router, dp, bot
+from bot.loader import router, dp, bot, LOCAL_TIME
 from loguru import logger
 
 from bot.utils.keyboards import create_keyboard
-from bot.utils.models import Word, UserWord, UserTests
+from bot.utils.models import Word, UserWord, UserTests, Users
 from bot.utils.system import start_test
 from bot.utils.texts import rnd_w_list, create_text
 import time
@@ -17,6 +17,7 @@ class User_state(StatesGroup):
     answering_emphasis_words = State()
     answering_emphasis_test = State()
     chose_length_test = State()
+    change_glob_time = State()
     chill = State()
 
 
@@ -83,6 +84,19 @@ async def test_answer(message: types.Message, state: FSMContext):
     await UserTests.save(data)
     await state.set_state(User_state.chill)
 
-    await bot.send_message(chat_id=message.chat.id, text=create_text('finish_test'), reply_markup=create_keyboard('start'))
+    await bot.send_message(chat_id=message.chat.id, text=create_text('finish_test'),
+                           reply_markup=create_keyboard('start'))
 
     # это было последнее слово в тесте, пишет результаты теста
+
+
+@router.message(User_state.change_glob_time, F.text)
+async def change_glob_time(message: types.Message, state: FSMContext) -> None:
+    if not message.text.isdigit() or int(message.text) > 24 or int(message.text) < -24:
+        await bot.send_message(chat_id=message.chat.id, text='baaad')  # TODO: text
+        return
+    await state.set_state(User_state.chill)
+    data = await Users.find_one(Users.user_id == message.chat.id)
+    data.time_offset = int(message.text) - LOCAL_TIME
+    await UserTests.save(data)
+    await bot.send_message(chat_id=message.chat.id, text=await create_text('time_was_set'))

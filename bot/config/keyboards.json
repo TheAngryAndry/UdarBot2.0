@@ -19,6 +19,12 @@
                     "text": "Посмотреть историю",
                     "callback_data": "see_progress"
                 }
+            ],
+            [
+                {
+                    "text": "Настройки",
+                    "callback_data": "settings"
+                }
             ]
         ]
     },
@@ -70,5 +76,30 @@
                 }
             ]
         ]
+    },
+    {
+        "call": "settings",
+        "keyboard": [
+            [
+                {
+                    "text": "Сменить часовой пояс",
+                    "callback_data": "change_glob_time"
+                }
+
+            ]
+        ]
+    },
+    {
+        "call": "change_glob_time",
+        "keyboard": [
+            [
+                {
+                    "text": "Москва (+3)",
+                    "callback_data": "change_glob_time+3"
+                }
+
+            ]
+        ]
     }
 ]
+
