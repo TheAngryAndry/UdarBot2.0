@@ -17,7 +17,6 @@ MONGO_PASS = os.environ.get('MONGO_PASS')
 BOT_PASS = os.environ.get('BOT_PASS')
 TIME_FORMAT = "%Y/%m/%d %H:%M:%S"
 
-
 # Check if token is provided
 if not TOKEN:
     logger.error('Token not provided')
