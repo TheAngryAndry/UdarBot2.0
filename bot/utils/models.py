@@ -30,3 +30,9 @@ class UserTests(Document):
     words: list[UserWord]
     time_start: float
     time_end: float | None
+
+
+class UserSending(Document):
+    user_id: int
+    time: float
+    # data: {str: str} TODO:

@@ -58,7 +58,6 @@ def create_keyboard(call: str, data: list = None, formats_callback: dict = None,
                                                     web_app=button["web_app"] if "web_app" in button else None,
                                                     pay=button["pay"] if "pay" in button else False))
             break
-    print(keyboard)
     return types.InlineKeyboardMarkup(inline_keyboard=keyboard)
 
 def add_button(keyboard: types.InlineKeyboardMarkup, text: str,

@@ -1,13 +1,16 @@
 import asyncio
 
+from apscheduler.jobstores.sqlalchemy import SQLAlchemyJobStore
 from loguru import logger
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import Document, init_beanie, UnionDoc
 from aiogram.types import MenuButtonCommands
+from apscheduler.jobstores.mongodb import MongoDBJobStore
 
 import bot.loader as loader
 from bot.utils.system import menu_button
 from bot.utils.texts import load_words
+
 
 async def main():
     # Connect to MongoDB
@@ -17,7 +20,8 @@ async def main():
     if client.database is None:
         logger.error("Failed to connect to MongoDB")
     logger.info("Starting bot...")
-
+    loader.scheduler.add_jobstore(MongoDBJobStore(database=loader.MONGO_DB, collection='jobs'), collection='jobs')
+    loader.scheduler.start()
     # Start bot and Beanie
     await asyncio.gather(
         loader.dp.start_polling(loader.bot),

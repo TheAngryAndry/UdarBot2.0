@@ -47,12 +47,21 @@ async def com_help(message: types.Message) -> None:
 @dp.message(Command('stop'), User_state.chose_length_test)
 async def com_stop_test(message: types.Message, state: FSMContext) -> None:
     await UserTests.find_many(UserTests.user_id == message.from_user.id and UserTests.stage != -1).delete()
-    await state.set_state(User_state.chill)
+
+    current_state = await state.get_state()
+    print(state.get_data())
+    # logger.info('state data' + *state.get_data())
+    if current_state is None:
+        return
+
+    # logger.info("Cancelling state %r", current_state)
+    await state.clear()
+    print(state.get_data())
     await bot.send_message(chat_id=message.chat.id, text=await create_text('stop_test'), reply_markup='start')
 
 
 @dp.message(Command('stop'), User_state.answering_emphasis_words)
 async def com_stop_emphasis(message: types.Message, state: FSMContext) -> None:
-    await state.set_state(User_state.chill)
+    await state.clear()
     await bot.send_message(chat_id=message.chat.id, text=await create_text('stop'), reply_markup=create_keyboard('start'))
 

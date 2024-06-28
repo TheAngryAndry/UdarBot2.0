@@ -16,6 +16,12 @@
             ],
             [
                 {
+                    "text": "Решить задание из ЕГЭ",
+                    "callback_data": "do_UGE"
+                }
+            ],
+            [
+                {
                     "text": "Посмотреть историю",
                     "callback_data": "see_progress"
                 }
@@ -82,8 +88,53 @@
         "keyboard": [
             [
                 {
+                    "text": "Ежедневная отправка тестов",
+                    "callback_data": "scheduler_settings"
+                }
+
+            ],
+            [
+                {
                     "text": "Сменить часовой пояс",
                     "callback_data": "change_glob_time"
+                }
+
+            ]
+        ]
+    },
+    {
+        "call": "scheduler_settings",
+        "keyboard": [
+            [
+                {
+                    "text": "Добавить ежедневное событие",
+                    "callback_data": "add_scheduler"
+                }
+
+            ],
+            [
+                {
+                    "text": "Удалить ежедневное событие",
+                    "callback_data": "remove_scheduler"
+                }
+
+            ]
+        ]
+    },
+    {
+        "call": "chose_scheduler_type",
+        "keyboard": [
+            [
+                {
+                    "text": "Задание из егэ",
+                    "callback_data": "add_scheduler_UGE"
+                }
+
+            ],
+            [
+                {
+                    "text": "Тест",
+                    "callback_data": "add_scheduler_test"
                 }
 
             ]
@@ -99,6 +150,19 @@
                 }
 
             ]
+        ]
+    },
+    {
+        "call": "admin",
+        "keyboard": [
+            [
+                {
+                    "text": "start/stop scheduler",
+                    "callback_data": "change_scheduler"
+                }
+
+            ]
+
         ]
     }
 ]

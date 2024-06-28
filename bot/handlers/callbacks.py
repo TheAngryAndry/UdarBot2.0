@@ -5,9 +5,10 @@ from bson import ObjectId
 from loguru import logger
 import time
 
-from bot.loader import bot, dp, router
+from bot.loader import bot, dp, router, scheduler
 from bot.utils.keyboards import create_keyboard
 from bot.utils.models import UserWord, UserTests, Users
+from bot.utils.scheduler import scheduler_send
 from bot.utils.states import User_state
 from bot.utils.system import start_test, calculate_time
 from bot.utils.texts import create_text, rnd_w_list
@@ -132,7 +133,6 @@ async def chose_test(call: types.CallbackQuery, state: FSMContext) -> None:
         t = str(i + 1) + ': ' + await calculate_time(number_tests[i].time_start, call.message.chat.id)
         keyboard.append(
             [types.InlineKeyboardButton(text=t, callback_data='progress_numtest_{}'.format(number_tests[i].id))])
-    print(keyboard)
     await call.message.answer(text=await create_text('chose_test'),
                               reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard))
 
@@ -211,7 +211,7 @@ async def see_all_progress(call: types.CallbackQuery, state: FSMContext) -> None
     if not st:
         st = await create_text('no_progress')
     await call.message.answer(text=st)
-    await call.answer()
+
 
 @router.callback_query(F.data == 'settings')
 async def settings(call: types.CallbackQuery, state: FSMContext) -> None:
@@ -221,14 +221,87 @@ async def settings(call: types.CallbackQuery, state: FSMContext) -> None:
 
 @router.callback_query(F.data == 'change_glob_time')
 async def change_glob_time(call: types.CallbackQuery, state: FSMContext) -> None:
-    state.set_state(User_state.change_glob_time)
-    await call.message.answer(text=await create_text('change_glob_time'), reply_markup=create_keyboard('change_glob_time'))
+    await state.set_state(User_state.change_glob_time)
+    await call.message.answer(text=await create_text('change_glob_time'),
+                              reply_markup=create_keyboard('change_glob_time'))
     await call.answer()
+
 
 @router.callback_query(F.data == "change_glob_time+3")
 async def change_glob_time3(call: types.CallbackQuery, state: FSMContext) -> None:
-    state.set_state(User_state.chill)
+    await state.clear()
     data = await Users.find_one(Users.user_id == call.message.chat.id)
     data.time_offset = 0
     await UserTests.save(data)
     await call.message.answer(text=await create_text('time_was_set'))
+
+
+@router.callback_query(F.data == "scheduler_settings")
+async def scheduler_settings(call: types.CallbackQuery, state: FSMContext) -> None:
+    jobs = scheduler.get_jobs()
+    st = '.'
+    if not jobs:
+        st += ' '
+        # await call.message.answer(text=await create_keyboard('no_scheduler'),
+        #                           reply_markup=create_keyboard('scheduler_settings'))
+    else:
+        for job in jobs:
+            st += str(job.trigger) + ' ' + str(job.args)
+    await call.message.answer(text=st, reply_markup=create_keyboard('scheduler_settings'))
+
+
+@router.callback_query(F.data == "add_scheduler")
+async def add_scheduler(call: types.CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(User_state.add_scheduler_time)
+    await call.message.answer(text=await create_text('chose_scheduler_time'))
+
+
+@router.callback_query(F.data == "add_scheduler_UGE")
+@router.callback_query(F.data == "add_scheduler_test")
+async def add_scheduler_USE(call: types.CallbackQuery, state: FSMContext) -> None:
+    await state.set_state(User_state.add_scheduler_nums)
+    await state.update_data(scheduler_type=call.data.split('_')[-1])
+    await call.message.answer(text=await create_text('add_scheduler_nums'))
+
+
+@router.callback_query(F.data == "remove_scheduler")
+@router.callback_query(F.data == "change_scheduler")
+async def change_scheduler(call: types.CallbackQuery, state: FSMContext) -> None:
+    keyboard = []
+    jobs = scheduler.get_jobs()
+    for i in range(len(jobs)):
+        t = str(i + 1) + '. ' + str(jobs[i].args) + ' ' + str(jobs[i].trigger)
+        keyboard.append([types.InlineKeyboardButton(text=t,
+                                                    callback_data='{}_scheduler_id_{}'.format(call.data.split('_')[0],
+                                                                                              jobs[i].id))])
+
+    await call.message.answer(text=await create_text('choose_schedule_to_{}'.format(call.data.split('_')[0])),
+                              reply_markup=types.InlineKeyboardMarkup(inline_keyboard=keyboard))
+
+
+@router.callback_query(F.data.startswith('change_scheduler_id_'))
+async def change_scheduler_id(call: types.CallbackQuery, state: FSMContext) -> None:
+    pass  # TODO:
+    # [
+    #     {
+    #         "text": "Изменить ежедневное событие",
+    #         "callback_data": "change_scheduler"
+    #     }
+    #
+    # ],
+
+
+@router.callback_query(F.data.startswith("remove_scheduler_id_"))
+async def remove_scheduler(call: types.CallbackQuery, state: FSMContext) -> None:
+    t = call.data.replace('remove_scheduler_id_', '', 1)
+    if any(i.id == t for i in scheduler.get_jobs()):
+        scheduler.remove_job(job_id=t)
+        await call.message.answer(text='job was deleted')  # TODO: text
+    else:
+        await call.message.answer(text='no id')  # TODO: text
+
+
+@router.callback_query(F.data == "do_UGE")
+async def change_scheduler(call: types.CallbackQuery, state: FSMContext) -> None:
+    #     2-3
+    pass
